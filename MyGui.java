@@ -1,4 +1,8 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.util.Map;
 
 public class MyGui {
     static MyGui instance;
@@ -9,6 +13,9 @@ public class MyGui {
 
     public JFrame jFrame = new JFrame();
     public JPanel jPanel = new JPanel();
+
+    File configFile;
+    Map<String, String> config;
 
     JButton connect;
     JButton disconnect;
@@ -24,18 +31,23 @@ public class MyGui {
     JLabel logWindow;
     JLabel choosePort;
 
-    JButton flush = new JButton();
+    JButton flush;
+
+    JFileChooser chooser;
+
+    int currentFrameHight = 600;
 
     public static void main(String[] args) {
         instance = new MyGui();
-        instance.initCcompotents();
+        instance.initComponents();
+        instance.assignListeners();
     }
 
-    void initCcompotents(){
+    private void initComponents(){
         jFrame.setVisible(true);
         jFrame.setTitle("COM port control");
-        jFrame.setBounds(750,250,700,600);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setFrameSize(currentFrameHight);
 
         jFrame.add(jPanel);
 
@@ -63,6 +75,7 @@ public class MyGui {
 
         log = new JTextArea(5,25);
         log.setLineWrap(true);
+        log.setEnabled(false);
         JScrollPane jScrollPane = new JScrollPane(log);
         jScrollPane.setBounds(370, 70, 250, 400);
 
@@ -75,6 +88,21 @@ public class MyGui {
 
         flush = new JButton("flush");
         flush.setBounds(550,40,70,25);
+
+        chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new java.io.File( "." ));
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.getName().endsWith(".json") || f.isDirectory();
+            }
+
+            @Override
+            public String getDescription() {
+                return "json files";
+            }
+        });
 
         jPanel.add(flush);
 
@@ -104,9 +132,72 @@ public class MyGui {
         jPanel.revalidate();
 
         jPanel.repaint();
+    }
 
+    private void assignListeners(){
+        open.addActionListener(e -> {
+            int result = chooser.showOpenDialog(jPanel);
+            if(result == 0){
+                configFile = chooser.getSelectedFile();
+                config = JsonParser.parse(configFile);
+                addCustomCommands();
+            }
+        });
+        flush.addActionListener(e ->
+            log.setText("")
+        );
 
+        submit.addActionListener(e -> {
+            writeLog(command.getText());
+            command.setText("");
+        }
+        );
 
     }
 
+    private void addCustomCommands(){
+        if(config == null) {
+            return;
+        }
+        int offset = 130;
+
+        int expectedHight = config.keySet().size() * 30 + offset + 10;
+
+        if( expectedHight > currentFrameHight){
+            setFrameSize(expectedHight + 10);
+        }
+
+        for(Map.Entry<String, String> entry: config.entrySet()){
+            String name = entry.getKey();
+            JButton jButton = new JButton(name);
+            int yCoordinate = offset + 30;
+            int width = name.length() * 15;
+            offset = yCoordinate;
+            jButton.setBounds(40, yCoordinate, width, 25);
+            jButton.addActionListener(this::performCommandAction);
+            jPanel.add(jButton);
+        }
+
+        jPanel.revalidate();
+        jPanel.repaint();
+    }
+
+    private void performCommandAction(ActionEvent e){
+        JButton button = (JButton) e.getSource();
+        String buttonName = button.getText();
+        String value = config.get(buttonName);
+        writeLog(value);
+    }
+
+    void writeLog(String text){
+        if(log.getText().length() == 0){
+            log.append(text);
+        }else {
+            log.append("\n" + text);
+        }
+    }
+
+    void setFrameSize(int height){
+        jFrame.setBounds(750,250,700,height);
+    }
 }
