@@ -7,7 +7,7 @@ import java.util.Map;
 public class MyGui {
     static MyGui instance;
 
-    public static MyGui getGUi(){
+    public static MyGui getGUi() {
         return instance;
     }
 
@@ -43,7 +43,7 @@ public class MyGui {
         instance.assignListeners();
     }
 
-    private void initComponents(){
+    private void initComponents() {
         jFrame.setVisible(true);
         jFrame.setTitle("COM port control");
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -54,7 +54,7 @@ public class MyGui {
         jPanel.setLayout(null);
 
         connect = new JButton("connect");
-        connect.setBounds(140,70,100,25);
+        connect.setBounds(140, 70, 100, 25);
 
         disconnect = new JButton("disconnect");
         disconnect.setBounds(245, 70, 100, 25);
@@ -73,7 +73,7 @@ public class MyGui {
         open = new JButton("open...");
         open.setBounds(265, 110, 80, 25);
 
-        log = new JTextArea(5,25);
+        log = new JTextArea(5, 25);
         log.setLineWrap(true);
         log.setEnabled(false);
         JScrollPane jScrollPane = new JScrollPane(log);
@@ -81,16 +81,16 @@ public class MyGui {
 
 
         logWindow = new JLabel("Log:");
-        logWindow.setBounds(370,40,30,25);
+        logWindow.setBounds(370, 40, 30, 25);
 
         choosePort = new JLabel("Choose existing port name");
         choosePort.setBounds(40, 40, 250, 25);
 
         flush = new JButton("flush");
-        flush.setBounds(550,40,70,25);
+        flush.setBounds(550, 40, 70, 25);
 
         chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new java.io.File( "." ));
+        chooser.setCurrentDirectory(new java.io.File("."));
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setFileFilter(new FileFilter() {
             @Override
@@ -109,24 +109,19 @@ public class MyGui {
         jPanel.add(choosePort);
 
         jPanel.add(logWindow);
+
         jPanel.add(jScrollPane);
-        jPanel.revalidate();
 
         jPanel.add(connect);
-        jPanel.revalidate();
 
         jPanel.add(disconnect);
-        jPanel.revalidate();
 
         jPanel.add(ports);
-        jPanel.revalidate();
 
         jPanel.add(command);
-        jPanel.revalidate();
 
         jPanel.add(submit);
 
-        jPanel.revalidate();
         jPanel.add(open);
 
         jPanel.revalidate();
@@ -134,45 +129,45 @@ public class MyGui {
         jPanel.repaint();
     }
 
-    private void assignListeners(){
+    private void assignListeners() {
         open.addActionListener(e -> {
             int result = chooser.showOpenDialog(jPanel);
-            if(result == 0){
+            if (result == 0) {
                 configFile = chooser.getSelectedFile();
                 config = JsonParser.parse(configFile);
                 addCustomCommands();
             }
         });
         flush.addActionListener(e ->
-            log.setText("")
+                log.setText("")
         );
 
         submit.addActionListener(e -> {
-            writeLog(command.getText());
-            command.setText("");
-        }
+                    writeLog(command.getText());
+                    command.setText("");
+                }
         );
 
     }
 
-    private void addCustomCommands(){
-        if(config == null) {
+    private void addCustomCommands() {
+        if (config == null) {
             return;
         }
-        int offset = 130;
+        int offset = 150;
 
-        int expectedHight = config.keySet().size() * 30 + offset + 10;
+        int expectedHeight = config.keySet().size() * 30 + offset + 60;
 
-        if( expectedHight > currentFrameHight){
-            setFrameSize(expectedHight + 10);
+        if (expectedHeight > currentFrameHight) {
+            setFrameSize(expectedHeight);
         }
 
-        for(Map.Entry<String, String> entry: config.entrySet()){
+        for (Map.Entry<String, String> entry : config.entrySet()) {
             String name = entry.getKey();
             JButton jButton = new JButton(name);
-            int yCoordinate = offset + 30;
+            int yCoordinate = offset;
+            offset += 30;
             int width = name.length() * 15;
-            offset = yCoordinate;
             jButton.setBounds(40, yCoordinate, width, 25);
             jButton.addActionListener(this::performCommandAction);
             jPanel.add(jButton);
@@ -182,22 +177,18 @@ public class MyGui {
         jPanel.repaint();
     }
 
-    private void performCommandAction(ActionEvent e){
+    private void performCommandAction(ActionEvent e) {
         JButton button = (JButton) e.getSource();
         String buttonName = button.getText();
         String value = config.get(buttonName);
         writeLog(value);
     }
 
-    void writeLog(String text){
-        if(log.getText().length() == 0){
-            log.append(text);
-        }else {
-            log.append("\n" + text);
-        }
+    void writeLog(String text) {
+        log.append((log.getText().length() == 0) ? text : "\n" + text);
     }
 
-    void setFrameSize(int height){
-        jFrame.setBounds(750,250,700,height);
+    void setFrameSize(int height) {
+        jFrame.setBounds(750, 250, 700, height);
     }
 }
