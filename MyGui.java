@@ -35,7 +35,7 @@ public class MyGui {
 
     JFileChooser chooser;
 
-    int currentFrameHight = 600;
+    int currentFrameHeight = 600;
 
     MyCommunicator communicator;
 
@@ -50,7 +50,7 @@ public class MyGui {
         jFrame.setVisible(true);
         jFrame.setTitle("COM port control");
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setFrameSize(currentFrameHight);
+        setFrameSize(currentFrameHeight);
 
         jFrame.add(jPanel);
 
@@ -63,7 +63,7 @@ public class MyGui {
         disconnect.setBounds(245, 70, 100, 25);
 
         String[] example = {"com1", "com3", "com4"};
-        ports = new JComboBox<>(example);
+        ports = new JComboBox<>(communicator.getPorts());
         ports.setBounds(40, 70, 95, 25);
 
 
@@ -146,19 +146,13 @@ public class MyGui {
         );
 
         submit.addActionListener(e -> {
-                    writeLog(command.getText());
+                    submitPerformed(command.getText());
                     command.setText("");
-                    writeByte();
                 }
         );
+        connect.addActionListener(e -> connectPerformed());
+        disconnect.addActionListener(e -> disconnectPerformed());
 
-    }
-
-    public void writeByte() {
-        byte b = 3;
-        String s2 = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
-        byte b2 = 00000010;
-        //writeLog(s2);
     }
 
     private void addCustomCommands() {
@@ -169,7 +163,7 @@ public class MyGui {
 
         int expectedHeight = config.keySet().size() * 30 + offset + 60;
 
-        if (expectedHeight > currentFrameHight) {
+        if (expectedHeight > currentFrameHeight) {
             setFrameSize(expectedHeight);
         }
 
@@ -192,25 +186,31 @@ public class MyGui {
         JButton button = (JButton) e.getSource();
         String buttonName = button.getText();
         String value = config.get(buttonName);
-        writeLog(value);
+        submitPerformed(value);
     }
 
     void writeLog(String text) {
         log.append((log.getText().length() == 0) ? text : "\n" + text);
     }
 
-    void setFrameSize(int height) {
+    private void setFrameSize(int height) {
         jFrame.setBounds(750, 250, 700, height);
     }
 
-    void connectPerformed() {
+    private void connectPerformed() {
         communicator.connect();
-        if (communicator.initIOStream() == true) {
+        if (communicator.initIOStream()) {
             communicator.initListener();
         }
     }
 
-    void disconnectPerformed(){
+    private void disconnectPerformed() {
         communicator.disconnect();
+    }
+
+    private void submitPerformed(String data) {
+        byte[] b = HexBinUtil.hexStringToByteArray(data);
+        String out = HexBinUtil.stringFromByteArray(b);
+        writeLog(out);
     }
 }

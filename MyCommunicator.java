@@ -16,6 +16,7 @@ public class MyCommunicator implements SerialPortEventListener{
     private Enumeration ports = null;
     private SerialPort serialPort = null;
     final static int TIMEOUT = 2000;
+    private static int BAUD_RATE = 9600;
     private InputStream input = null;
     private OutputStream output = null;
 
@@ -50,7 +51,7 @@ public class MyCommunicator implements SerialPortEventListener{
         {
             commPort = selectedPortIdentifier.open("UART controller", TIMEOUT);
             serialPort = (SerialPort)commPort;
-
+            serialPort.setSerialPortParams(BAUD_RATE, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
             gui.writeLog(selectedPort + " opened successfully.");
             gui.log.setForeground(Color.black);
         }
@@ -68,7 +69,6 @@ public class MyCommunicator implements SerialPortEventListener{
 
     public void disconnect()
     {
-        //close the serial port
         try
         {
 
@@ -103,7 +103,6 @@ public class MyCommunicator implements SerialPortEventListener{
 
     public boolean initIOStream()
     {
-        //return value for whather opening the streams is successful or not
         boolean successful = false;
 
         try {
