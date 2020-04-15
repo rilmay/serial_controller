@@ -37,7 +37,7 @@ public class MyCommunicator implements SerialPortEventListener{
                 portMap.put(curPort.getName(), curPort);
             }
         }
-        return (String[]) portMap.keySet().toArray();
+        return portMap.keySet().toArray(new String[0]);
     }
 
     public void connect()

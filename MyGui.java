@@ -201,6 +201,7 @@ public class MyGui {
         communicator.connect();
         if (communicator.initIOStream()) {
             communicator.initListener();
+            writeLog("Success");
         }
     }
 
@@ -211,6 +212,6 @@ public class MyGui {
     private void submitPerformed(String data) {
         byte[] b = HexBinUtil.hexStringToByteArray(data);
         String out = HexBinUtil.stringFromByteArray(b);
-        writeLog(out);
+        writeLog("WRITE: " + out);
     }
 }
