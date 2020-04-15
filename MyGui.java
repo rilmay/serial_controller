@@ -5,7 +5,7 @@ import java.io.File;
 import java.util.Map;
 
 public class MyGui {
-    static MyGui instance;
+    private static MyGui instance;
 
     public static MyGui getGUi() {
         return instance;
@@ -37,8 +37,11 @@ public class MyGui {
 
     int currentFrameHight = 600;
 
+    MyCommunicator communicator;
+
     public static void main(String[] args) {
         instance = new MyGui();
+        instance.communicator = new MyCommunicator(instance);
         instance.initComponents();
         instance.assignListeners();
     }
@@ -145,9 +148,17 @@ public class MyGui {
         submit.addActionListener(e -> {
                     writeLog(command.getText());
                     command.setText("");
+                    writeByte();
                 }
         );
 
+    }
+
+    public void writeByte() {
+        byte b = 3;
+        String s2 = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+        byte b2 = 00000010;
+        //writeLog(s2);
     }
 
     private void addCustomCommands() {
@@ -190,5 +201,16 @@ public class MyGui {
 
     void setFrameSize(int height) {
         jFrame.setBounds(750, 250, 700, height);
+    }
+
+    void connectPerformed() {
+        communicator.connect();
+        if (communicator.initIOStream() == true) {
+            communicator.initListener();
+        }
+    }
+
+    void disconnectPerformed(){
+        communicator.disconnect();
     }
 }
