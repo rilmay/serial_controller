@@ -48,7 +48,7 @@ public class MyGui {
 
     private void initComponents() {
         jFrame.setVisible(true);
-        jFrame.setTitle("COM port control");
+        jFrame.setTitle("SPI control panel");
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setFrameSize(currentFrameHeight);
 
@@ -213,5 +213,6 @@ public class MyGui {
         byte[] b = HexBinUtil.hexStringToByteArray(data);
         String out = HexBinUtil.stringFromByteArray(b);
         writeLog("WRITE: " + out);
+        communicator.writeData(b);
     }
 }
