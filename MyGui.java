@@ -1,3 +1,6 @@
+import util.HexBinUtil;
+import util.JsonParser;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionEvent;
@@ -6,6 +9,7 @@ import java.util.Map;
 
 public class MyGui {
     private static MyGui instance;
+    private boolean isConnected = false;
 
     public static MyGui getGUi() {
         return instance;
@@ -62,7 +66,6 @@ public class MyGui {
         disconnect = new JButton("disconnect");
         disconnect.setBounds(245, 70, 100, 25);
 
-        String[] example = {"com1", "com3", "com4"};
         ports = new JComboBox<>(communicator.getPorts());
         ports.setBounds(40, 70, 95, 25);
 
@@ -130,6 +133,25 @@ public class MyGui {
         jPanel.revalidate();
 
         jPanel.repaint();
+
+        setConnected(false);
+    }
+
+    private void setConnected(boolean isConnected){
+        this.isConnected = isConnected;
+        if(this.isConnected){
+            ports.setEnabled(false);
+            connect.setEnabled(false);
+            disconnect.setEnabled(true);
+            submit.setEnabled(false);
+            command.setEnabled(false);
+        }else{
+            ports.setEnabled(true);
+            connect.setEnabled(true);
+            disconnect.setEnabled(false);
+            submit.setEnabled(false);
+            command.setEnabled(false);
+        }
     }
 
     private void assignListeners() {
@@ -197,22 +219,37 @@ public class MyGui {
         jFrame.setBounds(750, 250, 700, height);
     }
 
+
     private void connectPerformed() {
-        communicator.connect();
-        if (communicator.initIOStream()) {
-            communicator.initListener();
-            writeLog("Success");
+        try{
+            communicator.connect();
+            if (communicator.initIOStream()) {
+                communicator.initListener();
+                writeLog("Success");
+                setConnected(true);
+            }
+        }catch (Exception e){
+            writeLog("Oops, something wrong just happened, message: " + e.getMessage());
         }
     }
 
     private void disconnectPerformed() {
         communicator.disconnect();
+        setConnected(false);
     }
 
     private void submitPerformed(String data) {
-        byte[] b = HexBinUtil.hexStringToByteArray(data);
-        String out = HexBinUtil.stringFromByteArray(b);
-        writeLog("WRITE: " + out);
-        communicator.writeData(b);
+        try {
+            if (isConnected) {
+                byte[] b = HexBinUtil.hexStringToByteArray(data);
+                String out = HexBinUtil.stringFromByteArray(b);
+                writeLog("WRITE: " + out);
+                communicator.writeData(b);
+            } else {
+                writeLog("You are not connected to any port, please choose one");
+            }
+        }catch (Exception e){
+            writeLog("Oops, something wrong just happened, message: " + e.getMessage());
+        }
     }
 }

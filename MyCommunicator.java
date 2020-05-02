@@ -1,4 +1,5 @@
 import gnu.io.*;
+import util.HexBinUtil;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class MyCommunicator implements SerialPortEventListener{
         String selectedPort = (String)gui.ports.getSelectedItem();
         selectedPortIdentifier = portMap.get(selectedPort);
 
-        CommPort commPort = null;
+        CommPort commPort;
 
         try
         {
@@ -140,11 +141,6 @@ public class MyCommunicator implements SerialPortEventListener{
 
     public boolean writeData(byte b){
         return writeData(HexBinUtil.byteArray(b));
-    }
-
-    public boolean writeTestData(){
-        byte b = 0;
-        return writeData(b);
     }
 
 
