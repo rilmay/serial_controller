@@ -161,6 +161,7 @@ public class MyGui {
                 configFile = chooser.getSelectedFile();
                 config = JsonParser.parse(configFile);
                 addCustomCommands();
+                open.setEnabled(false);
             }
         });
         flush.addActionListener(e ->
@@ -191,6 +192,9 @@ public class MyGui {
 
         for (Map.Entry<String, String> entry : config.entrySet()) {
             String name = entry.getKey();
+            if(name.length() > 17){
+                name = name.substring(0, 16) + "...";
+            }
             JButton jButton = new JButton(name);
             int yCoordinate = offset;
             offset += 30;
@@ -248,7 +252,10 @@ public class MyGui {
             } else {
                 writeLog("You are not connected to any port, please choose one");
             }
-        }catch (Exception e){
+        }catch (NumberFormatException e){
+            writeLog("Oops, something with your byte input, message: " + e.getMessage());
+        }
+        catch (Exception e){
             writeLog("Oops, something wrong just happened, message: " + e.getMessage());
         }
     }
