@@ -4,6 +4,8 @@ import util.JsonParser;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.Map;
 
@@ -72,6 +74,35 @@ public class MyGui {
 
         command = new JTextField(10);
         command.setBounds(40, 110, 115, 25);
+        command.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                String typedKey = (e.getKeyChar()+"");
+                if(typedKey.equals("\n")){
+                    if(command.getText().length() > 0 && isConnected){
+                        submitPerformed(command.getText());
+                        command.setText("");
+                        submit.setEnabled(false);
+                    }
+                }else{
+                    if("0123456789".contains(typedKey) || e.isActionKey()){
+                        submit.setEnabled(true);
+                    }else{
+                        e.consume();
+                    }
+                }
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
 
         submit = new JButton("submit");
         submit.setBounds(160, 110, 100, 25);
@@ -143,8 +174,8 @@ public class MyGui {
             ports.setEnabled(false);
             connect.setEnabled(false);
             disconnect.setEnabled(true);
-            submit.setEnabled(false);
-            command.setEnabled(false);
+            command.setEnabled(true);
+            submit.setEnabled(command.getText().length() > 0);
         }else{
             ports.setEnabled(true);
             connect.setEnabled(true);
